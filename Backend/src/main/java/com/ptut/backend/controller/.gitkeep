@@ -1,0 +1,7 @@
+package com.ptut.backend.controller;
+
+// Ajoutez vos contrôleurs REST ici
+// Exemple :
+// @RestController
+// @RequestMapping("/api/exemple")
+// public class ExempleController { ... }
