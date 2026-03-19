@@ -57,6 +57,7 @@ public class SecurityConfig {
                         "/error"
                         ).permitAll()
                     .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/ambassadeurs").hasAnyRole("ADMIN", "AMBASSADEUR")
                     .requestMatchers(HttpMethod.POST, "/resources/upload").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/resources/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.GET, "/resources/**").hasAnyRole("ADMIN", "AMBASSADEUR")
