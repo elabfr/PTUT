@@ -6,9 +6,22 @@ public class InscriptionResponse {
 
     private Long idInscription;
     private Long idAction;
-    private String emailAmbassadeur;
+    private String nomAmbassadeur;
+    private String prenomAmbassadeur;
     private Instant dateInscription;
     private String statutInscription;
+
+    public InscriptionResponse() {
+    }
+
+    public InscriptionResponse(Long idInscription, Long idAction, String nomAmbassadeur, String prenomAmbassadeur, Instant dateInscription, String statutInscription) {
+        this.idInscription = idInscription;
+        this.idAction = idAction;
+        this.nomAmbassadeur = nomAmbassadeur;
+        this.prenomAmbassadeur = prenomAmbassadeur;
+        this.dateInscription = dateInscription;
+        this.statutInscription = statutInscription;
+    }
 
     public Long getIdInscription() {
         return idInscription;
@@ -26,12 +39,20 @@ public class InscriptionResponse {
         this.idAction = idAction;
     }
 
-    public String getEmailAmbassadeur() {
-        return emailAmbassadeur;
+    public String getNomAmbassadeur() {
+        return nomAmbassadeur;
     }
 
-    public void setEmailAmbassadeur(String emailAmbassadeur) {
-        this.emailAmbassadeur = emailAmbassadeur;
+    public void setNomAmbassadeur(String nomAmbassadeur) {
+        this.nomAmbassadeur = nomAmbassadeur;
+    }
+
+    public String getPrenomAmbassadeur() {
+        return prenomAmbassadeur;
+    }
+
+    public void setPrenomAmbassadeur(String prenomAmbassadeur) {
+        this.prenomAmbassadeur = prenomAmbassadeur;
     }
 
     public Instant getDateInscription() {

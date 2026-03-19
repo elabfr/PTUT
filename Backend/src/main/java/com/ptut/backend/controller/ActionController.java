@@ -124,4 +124,22 @@ public class ActionController {
     public ResponseEntity<List<InscriptionResponse>> listInscriptionsByAction(@PathVariable("id") Long idAction) {
         return ResponseEntity.ok(actionService.listInscriptionsByAction(idAction));
     }
+
+    @Operation(summary = "Se désinscrire d'une action (AMBASSADEUR)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Désinscription effectuée",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Action, utilisateur ou inscription introuvable", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Non authentifié", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/{id}/inscriptions")
+    public ResponseEntity<Map<String, String>> desinscrireAction(
+            @PathVariable("id") Long idAction,
+            Authentication authentication
+    ) {
+        actionService.desinscrireAmbassadeur(idAction, authentication.getName());
+        return ResponseEntity.ok(Map.of("message", "Désinscription effectuée"));
+    }
 }

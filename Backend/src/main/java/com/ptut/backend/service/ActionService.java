@@ -108,7 +108,8 @@ public class ActionService {
         InscriptionResponse response = new InscriptionResponse();
         response.setIdInscription(saved.getIdInscription());
         response.setIdAction(action.getIdAction());
-        response.setEmailAmbassadeur(utilisateur.getEmail());
+        response.setNomAmbassadeur(utilisateur.getNom());
+        response.setPrenomAmbassadeur(utilisateur.getPrenom());
         response.setDateInscription(saved.getDateInscription());
         response.setStatutInscription(saved.getStatutInscription());
         return response;
@@ -119,16 +120,23 @@ public class ActionService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action introuvable");
         }
 
-        return inscriptionRepository.findAllByAction_IdActionOrderByDateInscriptionDesc(idAction).stream()
-                .map(inscription -> {
-                    InscriptionResponse response = new InscriptionResponse();
-                    response.setIdInscription(inscription.getIdInscription());
-                    response.setIdAction(inscription.getAction().getIdAction());
-                    response.setEmailAmbassadeur(inscription.getUtilisateur().getEmail());
-                    response.setDateInscription(inscription.getDateInscription());
-                    response.setStatutInscription(inscription.getStatutInscription());
-                    return response;
-                })
-                .toList();
+        return inscriptionRepository.findAllResponsesByActionId(idAction);
+    }
+
+    public void desinscrireAmbassadeur(Long idAction, String emailAmbassadeur) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(emailAmbassadeur)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+
+        if (utilisateur.getRole() != Role.AMBASSADEUR) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Seuls les ambassadeurs peuvent se désinscrire");
+        }
+
+        Action action = actionRepository.findById(idAction)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Action introuvable"));
+
+        Inscription inscription = inscriptionRepository.findByActionAndUtilisateur(action, utilisateur)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inscription introuvable"));
+
+        inscriptionRepository.delete(inscription);
     }
 }
