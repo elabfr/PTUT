@@ -10,6 +10,18 @@ public class ResourceSummaryResponse {
     private Instant uploadedAt;
     private String uploadedBy;
 
+    public ResourceSummaryResponse() {
+    }
+
+    public ResourceSummaryResponse(Long id, String fileName, String contentType, Long size, Instant uploadedAt, String uploadedBy) {
+        this.id = id;
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.size = size;
+        this.uploadedAt = uploadedAt;
+        this.uploadedBy = uploadedBy;
+    }
+
     public Long getId() {
         return id;
     }

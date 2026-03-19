@@ -44,9 +44,7 @@ public class DocumentResourceService {
     }
 
     public List<ResourceSummaryResponse> listAll() {
-        return documentResourceRepository.findAllByOrderByUploadedAtDesc().stream()
-                .map(this::toSummary)
-                .toList();
+        return documentResourceRepository.findAllSummariesOrderByUploadedAtDesc();
     }
 
     public DocumentResource getById(Long id) {
