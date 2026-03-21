@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -125,6 +127,32 @@ public class ActionController {
         return ResponseEntity.ok(actionService.listInscriptionsByAction(idAction));
     }
 
+    @Operation(summary = "Lister mes inscriptions (AMBASSADEUR)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste de mes inscriptions",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = InscriptionResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Non authentifié", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/inscriptions/me")
+    public ResponseEntity<List<InscriptionResponse>> listMesInscriptions(Authentication authentication) {
+        return ResponseEntity.ok(actionService.listMesInscriptions(authentication.getName()));
+    }
+
+    @Operation(summary = "Lister les dossiers en cours de traitement (ADMIN)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des dossiers en cours",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = InscriptionResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Non authentifié", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/inscriptions/dossiers-en-cours")
+    public ResponseEntity<List<InscriptionResponse>> listDossiersEnCours() {
+        return ResponseEntity.ok(actionService.listDossiersEnCours());
+    }
+
     @Operation(summary = "Se désinscrire d'une action (AMBASSADEUR)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Désinscription effectuée",
@@ -141,5 +169,60 @@ public class ActionController {
     ) {
         actionService.desinscrireAmbassadeur(idAction, authentication.getName());
         return ResponseEntity.ok(Map.of("message", "Désinscription effectuée"));
+    }
+
+        @Operation(summary = "Déposer un justificatif de présence (AMBASSADEUR)")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Justificatif déposé", content = @Content(mediaType = "application/json")),
+                        @ApiResponse(responseCode = "400", description = "Fichier invalide", content = @Content),
+                        @ApiResponse(responseCode = "404", description = "Action, utilisateur ou inscription introuvable", content = @Content),
+                        @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+                        @ApiResponse(responseCode = "401", description = "Non authentifié", content = @Content)
+        })
+        @SecurityRequirement(name = "bearerAuth")
+        @PostMapping(value = "/{id}/justificatif", consumes = "multipart/form-data")
+        public ResponseEntity<Map<String, String>> deposerJustificatifPresence(
+                        @PathVariable("id") Long idAction,
+                        @RequestParam("file") MultipartFile file,
+                        Authentication authentication
+        ) {
+                actionService.deposerJustificatifPresence(idAction, authentication.getName(), file);
+                return ResponseEntity.ok(Map.of("message", "Justificatif déposé"));
+        }
+
+    @Operation(summary = "Valider un dossier ambassadeur (ADMIN)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dossier validé",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = InscriptionResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Inscription introuvable", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Dossier déjà traité ou justificatif absent", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Non authentifié", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{id}/inscriptions/{idInscription}/valider")
+    public ResponseEntity<InscriptionResponse> validerDossier(
+            @PathVariable("id") Long idAction,
+            @PathVariable("idInscription") Long idInscription
+    ) {
+        return ResponseEntity.ok(actionService.validerDossier(idAction, idInscription));
+    }
+
+    @Operation(summary = "Refuser un dossier ambassadeur (ADMIN)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dossier refusé",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = InscriptionResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Inscription introuvable", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Dossier déjà traité ou justificatif absent", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Non authentifié", content = @Content)
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{id}/inscriptions/{idInscription}/refuser")
+    public ResponseEntity<InscriptionResponse> refuserDossier(
+            @PathVariable("id") Long idAction,
+            @PathVariable("idInscription") Long idInscription
+    ) {
+        return ResponseEntity.ok(actionService.refuserDossier(idAction, idInscription));
     }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -32,6 +33,10 @@ public class Inscription {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_utilisateur", nullable = false)
     private Utilisateur utilisateur;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_justificatif")
+    private DocumentResource justificatifPresence;
 
     public Long getIdInscription() {
         return idInscription;
@@ -71,5 +76,13 @@ public class Inscription {
 
     public void setUtilisateur(Utilisateur utilisateur) {
         this.utilisateur = utilisateur;
+    }
+
+    public DocumentResource getJustificatifPresence() {
+        return justificatifPresence;
+    }
+
+    public void setJustificatifPresence(DocumentResource justificatifPresence) {
+        this.justificatifPresence = justificatifPresence;
     }
 }

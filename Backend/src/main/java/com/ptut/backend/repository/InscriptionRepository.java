@@ -17,6 +17,12 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
 
     Optional<Inscription> findByActionAndUtilisateur(Action action, Utilisateur utilisateur);
 
+    Optional<Inscription> findByIdInscriptionAndAction_IdAction(Long idInscription, Long idAction);
+
+    List<Inscription> findByUtilisateur_EmailOrderByDateInscriptionDesc(String email);
+
+    List<Inscription> findByStatutInscriptionAndJustificatifPresenceIsNotNullOrderByDateInscriptionDesc(String statutInscription);
+
     long countByAction(Action action);
 
     @Query("""
