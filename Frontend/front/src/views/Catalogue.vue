@@ -1,6 +1,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Action from '../components/Action.vue'
+import { useAuth } from '../composables/useAuth.js'
+
+const { authHeaders, estConnecte } = useAuth()
+const API_BASE = 'https://ptut-3.onrender.com'
 
 const TYPES = ['SALON ÉTUDIANT', 'LYCÉE', 'RÉSEAUX SOCIAUX', 'FORMATION']
 
@@ -39,66 +43,57 @@ function trouverMoisIndex(dateStr) {
     return -1
 }
 
+// ── Normalise les champs API vers le format front ──
+function normaliser(a) {
+    return {
+        id: a.idAction ?? a.id,
+        type: a.typeAction ?? a.type,
+        titre: a.titre,
+        date: a.dateAction ? new Date(a.dateAction).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : a.date,
+        lieu: a.lieu,
+        description: a.description,
+        places: a.capaciteMax ?? a.places,
+        statut: a.statut,
+        responsable: a.responsable
+    }
+}
+
 onMounted(async () => {
     try {
-        const res = await fetch('/api/actions')
+        const res = await fetch(`${API_BASE}/actions`, {
+            headers: estConnecte.value ? authHeaders() : {}
+        })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        actions.value = await res.json()
+        const data = await res.json()
+        actions.value = data.map(normaliser)
     } catch (e) {
+        console.log('Erreur API actions:', e.message)
         actions.value = [
             {
-                id: 1,
-                type: 'SALON ÉTUDIANT',
-                titre: 'Salon InfoSup – Toulouse',
-                date: '24 janv.',
-                lieu: 'Toulouse, Parc des expositions',
+                id: 1, type: 'SALON ÉTUDIANT', titre: 'Salon InfoSup – Toulouse',
+                date: '24 janv.', lieu: 'Toulouse, Parc des expositions',
                 description: 'Tenue du stand ISIS au Parc des Expos.\nPrésentation des filières et distribution de flyers aux prospects.',
                 places: 3
             },
             {
-                id: 2,
-                type: 'LYCÉE',
-                titre: 'Lycée Bellevue – Albi',
-                date: '24 janv.',
-                lieu: 'Albi',
+                id: 2, type: 'LYCÉE', titre: 'Lycée Bellevue – Albi',
+                date: '24 janv.', lieu: 'Albi',
                 description: 'Intervention dans les classes de terminale pour présenter les parcours.',
                 places: 1
             },
             {
-                id: 3,
-                type: 'RÉSEAUX SOCIAUX',
-                titre: 'Story Instagram – "Vie Campus"',
+                id: 3, type: 'RÉSEAUX SOCIAUX', titre: 'Story Instagram – "Vie Campus"',
                 date: 'Avant le 24 janv.',
                 description: 'Publication d\'une story Instagram mettant en avant la vie sur le campus.',
-                lien: 'https://instagram.com'
             },
             {
-                id: 4,
-                type: 'FORMATION',
-                titre: 'Atelier : Pitcher l\'école',
-                date: '24 janv.',
-                lieu: 'Parc des Expos, Toulouse',
+                id: 4, type: 'FORMATION', titre: 'Atelier : Pitcher l\'école',
+                date: '24 janv.', lieu: 'Parc des Expos, Toulouse',
                 description: 'Tenue du stand ISIS au Parc des Expos.\nPrésentation des filières et distribution de flyers aux prospects.',
                 places: 2
             },
-            {
-                id: 5,
-                type: 'RÉSEAUX SOCIAUX',
-                titre: 'Post LinkedIn – Témoignages étudiants',
-                date: '15 févr.',
-                description: 'Publication de témoignages d\'étudiants en formation.',
-                lien: 'https://linkedin.com'
-            },
-            {
-                id: 6,
-                type: 'SALON ÉTUDIANT',
-                titre: 'Forum des métiers – Montpellier',
-                date: '10 mars',
-                lieu: 'Montpellier',
-                description: 'Participation au forum des métiers de Montpellier.',
-                places: 5
-            }
         ]
+        error.value = null
     } finally {
         loading.value = false
     }
@@ -128,7 +123,6 @@ const actionsFiltrees = computed(() => {
 
         <h1 class="text-h5 font-weight-bold mb-5">Prochaines opportunités</h1>
 
-        <!-- ── Filtres ── -->
         <div class="d-flex ga-3 mb-6 flex-wrap">
             <v-select v-model="selectedType" :items="['Tous les types', ...TYPES]" density="comfortable"
                 variant="outlined" rounded="lg" hide-details style="max-width: 220px;" />
@@ -136,21 +130,15 @@ const actionsFiltrees = computed(() => {
                 density="comfortable" variant="outlined" rounded="lg" hide-details style="max-width: 200px;" />
         </div>
 
-        <!-- ── Chargement ── -->
         <div v-if="loading" class="d-flex justify-center py-12">
             <v-progress-circular indeterminate color="primary" />
         </div>
 
-        <!-- ── Erreur ── -->
-        <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4">
-            {{ error }}
-        </v-alert>
+        <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
 
-        <!-- ── Vide ── -->
         <v-alert v-else-if="actionsFiltrees.length === 0" type="info" variant="tonal"
             text="Aucune opportunité pour ces critères." />
 
-        <!-- ── Liste ── -->
         <template v-else>
             <Action v-for="action in actionsFiltrees" :key="action.id" :action="action" />
         </template>

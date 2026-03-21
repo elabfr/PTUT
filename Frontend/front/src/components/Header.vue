@@ -2,23 +2,28 @@
 import { ref } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
 
-const { utilisateur, estConnecte, estAdmin, login, logout } = useAuth()
+const { utilisateur, estConnecte, estAdmin, login, fetchMe, logout } = useAuth()
 
 const dialogProfil = ref(false)
-const identifiant = ref('')
-const motDePasse = ref('')
+const email = ref('')
+const password = ref('')
 const afficherMdp = ref(false)
 const erreur = ref('')
+const chargement = ref(false)
 
-function seConnecter() {
+async function seConnecter() {
     erreur.value = ''
+    chargement.value = true
     try {
-        login(identifiant.value, motDePasse.value)
+        await login(email.value, password.value)
+        await fetchMe() // récupère nom/prénom si disponible
         dialogProfil.value = false
-        identifiant.value = ''
-        motDePasse.value = ''
+        email.value = ''
+        password.value = ''
     } catch (e) {
         erreur.value = e.message
+    } finally {
+        chargement.value = false
     }
 }
 
@@ -59,7 +64,7 @@ function onProfilClick() {
 
         <v-btn variant="flat" color="bleu" rounded="xl" class="mx-3" @click="onProfilClick">
             <v-icon class="mr-2">mdi-account</v-icon>
-            <span v-if="estConnecte">{{ utilisateur.prenom }} {{ utilisateur.nom }}</span>
+            <span v-if="estConnecte && utilisateur">{{ utilisateur.prenom }} {{ utilisateur.nom }}</span>
             <span v-else>Mon Profil</span>
         </v-btn>
     </v-app-bar>
@@ -77,10 +82,10 @@ function onProfilClick() {
                     {{ erreur }}
                 </v-alert>
 
-                <v-text-field v-model="identifiant" label="Identifiant" variant="outlined" rounded="lg"
+                <v-text-field v-model="email" label="Email" type="email" variant="outlined" rounded="lg"
                     density="comfortable" class="mb-3" hide-details />
 
-                <v-text-field v-model="motDePasse" label="Mot de passe" :type="afficherMdp ? 'text' : 'password'"
+                <v-text-field v-model="password" label="Mot de passe" :type="afficherMdp ? 'text' : 'password'"
                     variant="outlined" rounded="lg" density="comfortable"
                     :append-inner-icon="afficherMdp ? 'mdi-eye-off' : 'mdi-eye'"
                     @click:append-inner="afficherMdp = !afficherMdp" hide-details @keyup.enter="seConnecter" />
@@ -91,7 +96,7 @@ function onProfilClick() {
                     Annuler
                 </v-btn>
                 <v-spacer />
-                <v-btn color="bleu" variant="flat" rounded="xl" :disabled="!identifiant || !motDePasse"
+                <v-btn color="bleu" variant="flat" rounded="xl" :loading="chargement" :disabled="!email || !password"
                     @click="seConnecter">
                     Se connecter
                 </v-btn>
