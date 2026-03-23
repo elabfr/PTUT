@@ -4,7 +4,7 @@ import { useAuth } from '../composables/useAuth.js'
 
 const { authHeaders, estConnecte } = useAuth()
 
-const API_BASE = 'https://ptut-3.onrender.com'
+const API_BASE = 'https://api-ptut.up.railway.app'
 
 const fichiers = ref([])
 const loading = ref(true)

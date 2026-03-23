@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
 
 const { authHeaders } = useAuth()
-const API_BASE = 'https://ptut-3.onrender.com'
+const API_BASE = 'https://api-ptut.up.railway.app'
 
 const loading = ref(true)
 

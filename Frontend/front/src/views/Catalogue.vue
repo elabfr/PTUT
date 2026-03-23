@@ -4,7 +4,7 @@ import Action from '../components/Action.vue'
 import { useAuth } from '../composables/useAuth.js'
 
 const { authHeaders, estConnecte } = useAuth()
-const API_BASE = 'https://ptut-3.onrender.com'
+const API_BASE = 'https://api-ptut.up.railway.app'
 
 const TYPES = ['SALON ÉTUDIANT', 'LYCÉE', 'RÉSEAUX SOCIAUX', 'FORMATION']
 

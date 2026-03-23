@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 
-const API_BASE = 'https://ptut-3.onrender.com'
+const API_BASE = 'https://api-ptut.up.railway.app'
 
 // ── État global ──
 const utilisateur = ref(null)
