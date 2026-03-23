@@ -14,6 +14,9 @@ public class AdminAccountInitializer implements CommandLineRunner {
     private static final String ADMIN_EMAIL = "manon.fleuranceau@univ-jfc.fr";
     private static final String ADMIN_PASSWORD = "admin0000";
 
+    private static final String ADMIN2_EMAIL = "a";
+    private static final String ADMIN2_PASSWORD = "a";
+
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
@@ -33,6 +36,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
         normalizeRoleValues();
         ensureRoleConstraint();
         ensureAdminAccount();
+        ensureAdmin2Account();
     }
 
     private void normalizeRoleValues() {
@@ -57,6 +61,24 @@ public class AdminAccountInitializer implements CommandLineRunner {
 
         if (admin.getPassword() == null || !passwordEncoder.matches(ADMIN_PASSWORD, admin.getPassword())) {
             admin.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
+        }
+
+        utilisateurRepository.save(admin);
+    }
+
+    private void ensureAdmin2Account() {
+        Utilisateur admin = utilisateurRepository.findByEmail(ADMIN2_EMAIL).orElseGet(() -> {
+            Utilisateur created = new Utilisateur();
+            created.setEmail(ADMIN2_EMAIL);
+            return created;
+        });
+
+        admin.setNom("Admin");
+        admin.setPrenom("Test");
+        admin.setRole(Role.ADMIN);
+
+        if (admin.getPassword() == null || !passwordEncoder.matches(ADMIN2_PASSWORD, admin.getPassword())) {
+            admin.setPassword(passwordEncoder.encode(ADMIN2_PASSWORD));
         }
 
         utilisateurRepository.save(admin);
